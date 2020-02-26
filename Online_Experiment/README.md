@@ -1,7 +1,8 @@
 # Online Algorithm Experiment with House image
 ## Steps to reproduce
 - Run the OnlineExperiment/HouseOnline.m function twice once with `Data/rand_state1` and again with `Data/rand_state2`
-+ ex.
+
+ex.
 - `HouseOnline('../Data/rand_state1')`
 - `HouseOnline('../Data/rand_state2')`
 

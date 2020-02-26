@@ -2,6 +2,7 @@
 This repo contains the code used for experiments in the [Learning Mixtures of Separable Dictionaries for Tensor Data: Analysis and Algorithm](https://arxiv.org/abs/1903.09284) paper.
 
 All of our computation experiments were carried out on a Linux high-performance computing (HPC) cluster provided by Rutgers Office of Advanced Research Computing specifically all of our experiments were run on: 
+
 Lenovo NextScale nx360 servers
 - 2 x 12-core Intel Xeon E5-2680 v3 "Haswell" processors
 - 128 GB RAM
