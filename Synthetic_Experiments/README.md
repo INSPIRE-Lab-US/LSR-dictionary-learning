@@ -1,4 +1,4 @@
-#Synthetic Experiment
+# Synthetic Experiment
 This directory contains the code used to produce the results from the synthetic experiments and the Figure 2a in the paper.
 
 ## Steps to redproduce
