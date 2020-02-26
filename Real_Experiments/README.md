@@ -16,3 +16,6 @@ ex. `House/getHousePSNR.m` this will print out a table similar to the one in the
 
 ## Runtime
 On our servers this job completed in 3 days for the House,Castle and Mushroom images however for the Lena image it took over 5 days to finish completely.
+
+## Note
+In order to reproduce our results for image denoising with SeDiL you will need the source code for SeDiL. We do not have permission to publicize that code therefore if you do not have it you can run the alternate function `LSRImageDenoising_noSeDiL.m`
