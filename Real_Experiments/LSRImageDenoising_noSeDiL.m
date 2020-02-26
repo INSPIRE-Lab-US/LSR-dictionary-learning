@@ -1,0 +1,355 @@
+%Main function for image denoising experiment
+
+%% Parameters
+% monte_carlos: Number of monte carlos to run
+% path_to_rand_state: The path to the random state you want to use
+% path_to_pic: The path to the image you want to learn the dictionary on an denoise
+% image: The name of the image you're denoising (ex. 'Lena', 'Mushroom',etc.)
+% randState: name of random stat being used (rnd1, rnd2, rnd3)
+function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, image, randState)
+    % Y: observation matrix
+    % D: dictionary
+    % X: coefficient matrix
+    % lambda: regularization term
+    % K: tensor order
+    % gamma: Augmented Lagrangian multiplier
+    % Objective function
+    %F_D = (1/2)*norm(Y-D*X,'fro')^2 + (lambda/N)*sum([unfold(W_1,1),unfold(W_2,2),unfold(W_3,3)]);
+    S = load(path_to_rand_state);
+
+    %Importing helper functions and other algorithms
+    addpath(genpath('../PARAFAC'));
+    addpath(genpath('../FISTA-SPAMS'));
+    addpath('../_utils');
+
+
+    %Importing main algos
+    addpath('../STARK');
+    addpath('../TeFDiL');
+
+    rng(S);
+    N_montcarl = monte_carlos;
+
+    fprintf('Performing LSR-DL image denoising on %s with %d Monte Carlos',image,N_montcarl);
+    
+    %% Loading image and extracting overlapping patches from it
+    Image=double(imread(path_to_pic));
+
+    %Finds max pixel across all 3 dimensions and divides entire image by that
+    %max pixel so that the max pixel value is now 1
+    input_data = double(Image)/max(max(max(Image)));
+
+    %a--row
+    %b--column
+    %c--3rd dimension
+    %Of each non-zero element in the Image matrix
+    [a,b,c]=ind2sub(size(input_data),find(Image));
+
+
+    %Sets input_data to only the non-zero elements of image
+    input_data=input_data(min(a):max(a),min(b):max(b),:);
+
+    dim1=size(input_data,1);
+    dim2=size(input_data,2);
+
+    N_freq = 3;% # of frequencies (# of features in the 3rd mode)
+    patch_size = 8;
+
+    %cropping the image for perfect tiling with no extra pixels
+    input_data=input_data(1:patch_size*floor(dim1/patch_size),1:patch_size*floor(dim2/patch_size),1:N_freq);
+    N_pixels=size(input_data,1)*size(input_data,1);
+    
+    %new (cropped) dimensions
+    dim1=size(input_data,1);
+    dim2=size(input_data,2);
+    
+    
+    %In orginal MainReal_updated_house_rnd1.m the stride=2
+    step = 2; %stride
+    if(image ~= "House")
+        step = 3;
+    end
+    for i=0:step:dim1-patch_size% step determines how much of the neighboring patches overlap
+        for j=0:step:dim2-patch_size
+            block_data{i/step+1,j/step+1}=input_data(i+1:i+patch_size, j+1:j+patch_size,:);
+        end
+    end
+
+    %cropping the image to exclude the extra pixels (due to step size)
+    input_data=input_data(1:i+patch_size,1:j+patch_size,1:N_freq);
+
+    %new (cropped) dimensions
+    dim1 = size(input_data,1);
+    dim2 = size(input_data,2);
+
+    dim1_block=size(block_data,1);
+    dim2_block=size(block_data,2);
+
+    N_blocks =dim1_block*dim2_block ;%number of blocks (data points)
+
+    obsrvtn_tensor = zeros(patch_size,patch_size,N_freq,N_blocks);
+    obsrvtn_vect = zeros(patch_size^2*N_freq,N_blocks);
+
+    k=0;
+    for i = 1:size(block_data,1)
+        for j = 1:size(block_data,2)
+            k = k+1;
+            obsrvtn_tensor(:,:,:,k) = block_data{i,j};
+            obsrvtn_vect(:,k) = reshape(obsrvtn_tensor(:,:,:,k),patch_size^2*N_freq,1,1);%each point is vectorized
+        end
+    end
+    %Noiseless data
+    Y_clean = obsrvtn_vect; %clean data
+
+    %% Dictionary Parameters
+    M = [patch_size, patch_size, N_freq];
+    P =[2*patch_size, 2*patch_size, N_freq];
+    
+    %Only used for STARK and TeFDiL
+    Dictionary_sizes{1}=fliplr(M);
+    Dictionary_sizes{2}=fliplr(P);%needs to be flipped
+
+    m=prod(M);
+    p=prod(P);
+
+    %% Experiment setup
+    N_sigs = 2; %Only testing with 2 sigma values
+
+    %For each algorithm (test and train) we will be storing representation error for each monte carlo iteration and sigma value
+
+    Rep_err_train_KSVD = zeros(N_montcarl,N_sigs);
+    Rep_err_train_BCD = zeros(N_montcarl,N_sigs);
+    Rep_err_train_sum_BCD = zeros(N_montcarl,N_sigs);
+    Rep_err_train_STARK = zeros(N_montcarl,N_sigs);
+    Rep_err_train_TeFDiL = zeros(N_montcarl,N_sigs);
+    Rep_err_train_TeFDiL2 = zeros(N_montcarl,N_sigs);
+
+    Rep_err_test_KSVD_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_BCD_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_sum_BCD_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_STARK_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_TeFDiL = zeros(N_montcarl,N_sigs);
+    Rep_err_test_TeFDiL_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_TeFDiL2_OMP = zeros(N_montcarl,N_sigs);
+
+    %Only used for STARK and TeFDiL
+    %Permutation_vector: vector containing the index of non-zero value of the permutation matrix in each row
+    %Permutation_vectorT: contains those of the transpose of the permutation matrix
+    [Permutation_vector, Permutation_vectorT]=permutation_vec(Dictionary_sizes);
+
+    Permutation_vectors=[Permutation_vector, Permutation_vectorT];
+
+    %% Algorithm Parameters
+    K = 3; %tensor order
+    
+    % Sparse Coding Parameters. Have to select sparse coding method here:
+    % 'OMP', 'SPAMS', 'FISTA'
+    % paramSC is input to all DL algorithms
+    s = ceil(p/20); %sparsity level
+    paramSC.s = s;
+    paramSC.lambdaFISTA = .1;
+    paramSC.MaxIterFISTA = 10;
+    paramSC.TolFISTA = 1e-6;
+    paramSC.lambdaSPAMS = 1;
+    paramSC.SparseCodingMethod= 'FISTA';
+
+    % Dictionary Learning Parameters
+    Max_Iter_DL = 50;
+   
+
+    % KSVD Parameters
+    ParamKSVD.L = s;   % number of elements in each linear combination.
+    ParamKSVD.K = p; % number of dictionary elements
+    ParamKSVD.numIteration = Max_Iter_DL; % number of iteration to execute the K-SVD algorithm.
+    ParamKSVD.memusage = 'high';
+    ParamKSVD.exact = 1;
+    ParamKSVD.errorFlag = 0;
+    ParamKSVD.preserveDCAtom = 0;
+    ParamKSVD.displayProgress = 0;
+
+    % STARK Parameters
+    ParamSTARK.TolADMM = 1e-4; %tolerance in ADMM update
+    ParamSTARK.MaxIterADMM = 10;
+    ParamSTARK.DicSizes=Dictionary_sizes;
+    ParamSTARK.Sparsity=s;
+    ParamSTARK.MaxIterDL=Max_Iter_DL;
+    ParamSTARK.TolDL=10^(-4);
+
+    % TeFDiL Parameters
+    ParamTeFDiL.MaxIterCP=50;
+    ParamTeFDiL.TensorRank=1;
+    ParamTeFDiL.DicSizes=Dictionary_sizes;
+    ParamTeFDiL.Sparsity=s;
+    ParamTeFDiL.MaxIterDL=Max_Iter_DL;
+    ParamTeFDiL.TolDL=10^(-4);
+    ParamTeFDiL.epsilon=0.01;%to impprove the condition number of XX^T. multiplied by its frobenious norm.
+
+    sig_vals = [10 50];
+    for mont_crl = 1:N_montcarl
+        mont_crl
+        for sigma_ind=1:2
+            sigma_ind
+            sigma = sig_vals(sigma_ind);
+            Y_noisy=Y_clean+sigma/max(max(max(Image)))*randn(size(Y_clean)); % noisy data
+
+            %Generate training data
+            N=length(Y_clean);
+            % noisy training data
+            Y_train = Y_noisy(:,randperm(N_blocks,N));
+
+
+            %Iinitializing coordinate dictionaries
+            D_init_k={1,3};
+
+
+            Y_tns = reshape(Y_train,M(1),M(2),M(3),N);
+            
+            for k=1:3
+                D_initk = unfold(Y_tns,size(Y_tns),k);
+                
+                cols_k = randperm(N*m/M(k),P(k));
+                
+                D_init_k{k} = normc(D_initk(:,cols_k));
+            end
+            D_init = kron(D_init_k{3},kron(D_init_k{2},D_init_k{1}));
+            %% KSVD with OMP
+            disp('Training unstructured dictionary using K-SVD')
+            if N >= p% does not work for N<p
+                ParamKSVD.InitializationMethod = 'DataElements';
+                tic
+                [D_KSVD,output] = KSVD(Y_train,ParamKSVD,paramSC);
+                toc
+                %%%Dictionary training Representation Error
+                Rep_err_train_KSVD(mont_crl,sigma_ind) = norm(Y_train - D_KSVD*output.CoefMatrix,'fro')^2/numel(Y_train);
+
+                %%%Dictionary test Representation Error with OMP
+                X_test_KSVD_OMP = OMP(D_KSVD,Y_noisy,s);
+                Y_KSVD_OMP = D_KSVD*X_test_KSVD_OMP;
+                [Image_out_KSVD_OMP, cnt_KSVD] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_KSVD_OMP,N_freq);
+                Rep_err_test_KSVD_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_KSVD_OMP./cnt_KSVD,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+            else
+                disp('Insufficient number of training samples for K-SVD')
+            end
+
+             %% LS Updates(BCD Algo)
+            disp('Training structured dictionary using LS')
+            tic
+            [D_LS,X_train_LS] = LS_SC_3D(Y_train,paramSC,Max_Iter_DL,D_init_k{1},D_init_k{2},D_init_k{3});
+            toc
+
+            %%Dictionary Representation training Error
+            Rep_err_train_BCD(mont_crl,sigma_ind) = norm(Y_train - D_LS*X_train_LS,'fro')^2/numel(Y_train);
+
+            %%Reconstructing the image with OMP
+            X_test_LS_OMP = OMP(D_LS,Y_noisy,s);
+            Y_LS_OMP = D_LS*X_test_LS_OMP;
+            [Image_out_LS_OMP, cnt_LS] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_LS_OMP,N_freq);
+            Rep_err_test_BCD_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_LS_OMP./cnt_LS,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+
+            %% TeFDiL(rank = 1)
+            disp('Training structured dictionary using TeFDiL')
+            tic
+            [D_TeFDiL, X_TeFDiL,Reconst_error_TeFDiL] = TeFDiL(Y_train,Permutation_vectors, D_init, ParamTeFDiL, paramSC);
+            toc
+
+            %Dictionary training Representation Error
+            Rep_err_train_TeFDiL(mont_crl,sigma_ind)=norm(Y_train-D_TeFDiL*X_TeFDiL,'fro')^2/numel(Y_train);
+
+            %%%Dictionary test Representation Error
+            X_test_TeFDiL = SparseCoding(Y_noisy,D_TeFDiL,paramSC);
+            Y_TeFDiL=D_TeFDiL*X_test_TeFDiL; 
+            
+            %%%Reconstructing the image from the overlapping patches
+            [Image_out_TeFDiL, cnt_TeFDiL] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_TeFDiL,N_freq);
+            Rep_err_test_TeFDiL(mont_crl,sigma_ind)=norm(reshape(input_data -Image_out_TeFDiL./cnt_TeFDiL,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+            
+            
+            %%%Dictionary test Representation Error with OMP
+            X_test_TeFDiL_OMP = OMP(D_TeFDiL,Y_noisy,s);
+            Y_TeFDiL_OMP = D_TeFDiL*X_test_TeFDiL_OMP;
+            [Image_out_TeFDiL_OMP, cnt_TeFDiL] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_TeFDiL_OMP,N_freq);
+            Rep_err_test_TeFDiL_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_TeFDiL_OMP./cnt_TeFDiL,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+            %% STARK
+            disp('Training structured dictionary using STARK')
+            lambdaADMM=norm(Y_train,'fro')^(1.5)/10;
+            gammaADMM = lambdaADMM/20;
+            ParamSTARK.lambdaADMM=lambdaADMM;
+            ParamSTARK.gammaADMM=gammaADMM;
+
+            tic
+            [D_STARK, X_STARK, Reconst_error_STARK] = STARK(Y_train, Permutation_vectors, D_init, ParamSTARK, paramSC);
+            toc
+
+            %%Dictionary training Representation Error
+            Rep_err_train_STARK(mont_crl,sigma_ind)=norm(Y_train-D_STARK*X_STARK,'fro')^2/numel(Y_train);
+
+            %%Dictionary test Representation Error with OMP
+            X_test_STARK_OMP = OMP(D_STARK,Y_noisy,s);
+            Y_STARK_OMP = D_STARK*X_test_STARK_OMP;
+            [Image_out_STARK_OMP, cnt_STARK] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_STARK_OMP,N_freq);
+            Rep_err_test_STARK_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_STARK_OMP./cnt_STARK,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+            %% Initialization for r=2
+            D_init_k={2,3};
+            for k=1:3
+                D_initk = unfold(Y_tns,size(Y_tns),k);
+                for r=1:2
+                    cols_k = randperm(N*m/M(k),P(k));
+                    D_init_k{r,k} = normcols(D_initk(:,cols_k));
+                end
+            end
+            D_init2 = normc( kron(D_init_k{1,3},kron(D_init_k{1,2},D_init_k{1,1}))...
+                +  kron(D_init_k{2,3},kron(D_init_k{2,2},D_init_k{2,1})));
+            D_init2 = normc(D_init2);
+
+            %%  Sum of LS Updates (BCD r>1)
+            disp('Training structured dictionary using sum of LS')
+
+            tic
+            [D_sum_LS,X_train_sum_LS] = LS_sum_SC_3D(Y_train,2,paramSC,Max_Iter_DL,D_init_k);
+            toc
+
+            %%Dictionary Representation training Error with OMP
+            Rep_err_train_sum_BCD(mont_crl,sigma_ind) = norm(Y_train - D_sum_LS*X_train_sum_LS,'fro')^2/N;
+
+            %%Dictionary Representation test Error with OMP
+            X_test_sum_LS = SparseCoding(Y_noisy,D_sum_LS,paramSC);
+            Y_sum_LS=D_sum_LS*X_test_sum_LS;
+
+            %%Reconstructing the image with OMP
+            X_test_sum_LS_OMP = OMP(D_sum_LS,Y_noisy,s);
+            Y_sum_LS_OMP = D_sum_LS*X_test_sum_LS_OMP;
+            [Image_out_sum_LS_OMP, cnt_sum_LS] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_sum_LS_OMP,N_freq);
+            Rep_err_test_sum_BCD_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_sum_LS_OMP./cnt_sum_LS,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+            %% TefDil rank2
+            disp('Training structured dictionary using TeFDiL (rank2)')
+            ParamTeFDiL.TensorRank=2;
+
+            tic
+            [D_TeFDiL2, X_TeFDiL2, Reconst_error_TeFDiL]= TeFDiL(Y_train,Permutation_vectors, D_init2, ParamTeFDiL,paramSC);
+            toc
+
+            %Dictionary training Representation Error
+            Rep_err_train_TeFDiL2(mont_crl,sigma_ind)=norm(Y_train-D_TeFDiL2*X_TeFDiL2,'fro')^2/numel(Y_train);
+
+            %Reconstructing the image with OMP
+            X_test_TeFDiL2_OMP = OMP(D_TeFDiL2,Y_noisy,s);
+            Y_TeFDiL2_OMP = D_TeFDiL2*X_test_TeFDiL2_OMP;
+            [Image_out_TeFDiL2_OMP, cnt_TeFDiL2] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_TeFDiL2_OMP,N_freq);
+            Rep_err_test_TeFDiL2_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_TeFDiL2_OMP./cnt_TeFDiL2,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+
+              name = strcat(image,'Denoising_',num2str(N_montcarl),'_',randState);
+
+            %% Saving Results
+            save(name,'N_montcarl','sig_vals','M','P','Rep_err_test_KSVD_OMP', 'Rep_err_test_SEDIL', 'Rep_err_test_BCD_OMP',...
+                'Rep_err_test_TeFDiL_OMP','Rep_err_test_sum_BCD_OMP', 'Rep_err_test_STARK_OMP', 'Rep_err_test_TeFDiL2_OMP')
+        end
+    end
+    mkdir(image);
+    movefile(strcat(name,'.mat'), image);
+end
+
