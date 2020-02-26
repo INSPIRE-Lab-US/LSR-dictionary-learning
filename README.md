@@ -17,8 +17,8 @@ In the paper we conducted three main experiments to produce the plots and charts
 
 **Note** Running these experiments may not give you the exact numbers reported in the paper however the results obtained from this codebase do not nullify any of the conclusions and analysis reported in the paper.
 
-[Reproducing Synthetic Experiments](Synthetic_Experiments/README.md)
-[Reproducing Online Experiment](Online_Experiment/README.md)
-[Reproducing Real Experiment](Real_Experiments/README.md)
++ [Reproducing Synthetic Experiments](Synthetic_Experiments/README.md)
++ [Reproducing Online Experiment](Online_Experiment/README.md)
++ [Reproducing Real Experiment](Real_Experiments/README.md)
 
 
