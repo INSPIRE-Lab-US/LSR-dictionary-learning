@@ -122,7 +122,7 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
     Rep_err_train_sum_BCD = zeros(N_montcarl,N_sigs);
     Rep_err_train_STARK = zeros(N_montcarl,N_sigs);
     Rep_err_train_TeFDiL = zeros(N_montcarl,N_sigs);
-    Rep_err_train_TeFDiL2 = zeros(N_montcarl,N_sigs);
+    Rep_err_train_TeFDiL32 = zeros(N_montcarl,N_sigs);
 
     Rep_err_test_KSVD_OMP = zeros(N_montcarl,N_sigs);
     Rep_err_test_BCD_OMP = zeros(N_montcarl,N_sigs);
@@ -130,7 +130,7 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
     Rep_err_test_STARK_OMP = zeros(N_montcarl,N_sigs);
     Rep_err_test_TeFDiL = zeros(N_montcarl,N_sigs);
     Rep_err_test_TeFDiL_OMP = zeros(N_montcarl,N_sigs);
-    Rep_err_test_TeFDiL2_OMP = zeros(N_montcarl,N_sigs);
+    Rep_err_test_TeFDiL32_OMP = zeros(N_montcarl,N_sigs);
 
     %Only used for STARK and TeFDiL
     %Permutation_vector: vector containing the index of non-zero value of the permutation matrix in each row
@@ -324,29 +324,43 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
             Y_sum_LS_OMP = D_sum_LS*X_test_sum_LS_OMP;
             [Image_out_sum_LS_OMP, cnt_sum_LS] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_sum_LS_OMP,N_freq);
             Rep_err_test_sum_BCD_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_sum_LS_OMP./cnt_sum_LS,dim1,dim2*N_freq),'fro')^2/numel(input_data);
-
+            %% Initialization for r=32
+            Rnk=32;
+            D_init_k={Rnk,3};
+            for k=1:3
+                D_initk = unfold(Y_tns,size(Y_tns),k);
+                for r=1:Rnk
+                    cols_k = randperm(N*m/M(k),P(k));
+                    D_init_k{r,k} = normcols(D_initk(:,cols_k));
+                end
+            end
+            D_init32 = zeros(m,p);
+            for r=1:Rnk
+                D_init32 = D_init32 + kron(D_init_k{r,3},kron(D_init_k{r,2},D_init_k{r,1}));
+            end
+            D_init32 = normc(D_init32);
             %% TefDil rank2
             disp('Training structured dictionary using TeFDiL (rank2)')
-            ParamTeFDiL.TensorRank=2;
+            ParamTeFDiL.TensorRank=32;
 
             tic
-            [D_TeFDiL2, X_TeFDiL2, Reconst_error_TeFDiL]= TeFDiL(Y_train,Permutation_vectors, D_init2, ParamTeFDiL,paramSC);
+            [D_TeFDiL32, X_TeFDiL32, Reconst_error_TeFDiL]= TeFDiL(Y_train,Permutation_vectors, D_init32, ParamTeFDiL,paramSC);
             toc
 
             %Dictionary training Representation Error
-            Rep_err_train_TeFDiL2(mont_crl,sigma_ind)=norm(Y_train-D_TeFDiL2*X_TeFDiL2,'fro')^2/numel(Y_train);
+            Rep_err_train_TeFDiL32(mont_crl,sigma_ind)=norm(Y_train-D_TeFDiL32*X_TeFDiL32,'fro')^2/numel(Y_train);
 
             %Reconstructing the image with OMP
-            X_test_TeFDiL2_OMP = OMP(D_TeFDiL2,Y_noisy,s);
-            Y_TeFDiL2_OMP = D_TeFDiL2*X_test_TeFDiL2_OMP;
-            [Image_out_TeFDiL2_OMP, cnt_TeFDiL2] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_TeFDiL2_OMP,N_freq);
-            Rep_err_test_TeFDiL2_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_TeFDiL2_OMP./cnt_TeFDiL2,dim1,dim2*N_freq),'fro')^2/numel(input_data);
+            X_test_TeFDiL32_OMP = OMP(D_TeFDiL32,Y_noisy,s);
+            Y_TeFDiL32_OMP = D_TeFDiL32*X_test_TeFDiL32_OMP;
+            [Image_out_TeFDiL32_OMP, cnt_TeFDiL32] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_TeFDiL32_OMP,N_freq);
+            Rep_err_test_TeFDiL32_OMP(mont_crl,sigma_ind)=norm(reshape(input_data-Image_out_TeFDiL32_OMP./cnt_TeFDiL32,dim1,dim2*N_freq),'fro')^2/numel(input_data);
 
               name = strcat(image,'Denoising_',num2str(N_montcarl),'_',randState);
 
             %% Saving Results
-            save(name,'N_montcarl','sig_vals','M','P','Rep_err_test_KSVD_OMP', 'Rep_err_test_SEDIL', 'Rep_err_test_BCD_OMP',...
-                'Rep_err_test_TeFDiL_OMP','Rep_err_test_sum_BCD_OMP', 'Rep_err_test_STARK_OMP', 'Rep_err_test_TeFDiL2_OMP')
+            save(name,'N_montcarl','sig_vals','M','P','Rep_err_test_KSVD_OMP', 'Rep_err_test_BCD_OMP',...
+                'Rep_err_test_TeFDiL_OMP','Rep_err_test_sum_BCD_OMP', 'Rep_err_test_STARK_OMP', 'Rep_err_test_TeFDiL32_OMP')
         end
     end
     mkdir(image);
