@@ -301,10 +301,6 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
                     D_init_k{r,k} = normcols(D_initk(:,cols_k));
                 end
             end
-            D_init2 = normc( kron(D_init_k{1,3},kron(D_init_k{1,2},D_init_k{1,1}))...
-                +  kron(D_init_k{2,3},kron(D_init_k{2,2},D_init_k{2,1})));
-            D_init2 = normc(D_init2);
-
             %%  Sum of LS Updates (BCD r>1)
             disp('Training structured dictionary using sum of LS')
 
