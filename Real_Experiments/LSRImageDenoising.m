@@ -4,8 +4,8 @@
 % monte_carlos: Number of monte carlos to run
 % path_to_rand_state: The path to the random state you want to use
 % path_to_pic: The path to the image you want to learn the dictionary on an denoise
-% image: The name of the image you're denoising (ex. 'Lena', 'Mushroom',etc.)
-% randState: name of random stat being used (rnd1, rnd2, rnd3)
+% image: The name of the image you're denoising (ex. 'Lena', 'Mushroom', 'House, or 'Castle')
+% randState: name of random stat being used ('rnd1', 'rnd2',  or 'rnd3')
 function LSRImageDenoising(monte_carlos,path_to_rand_state,path_to_pic, image, randState)
     % Y: observation matrix
     % D: dictionary
@@ -15,6 +15,12 @@ function LSRImageDenoising(monte_carlos,path_to_rand_state,path_to_pic, image, r
     % gamma: Augmented Lagrangian multiplier
     % Objective function
     %F_D = (1/2)*norm(Y-D*X,'fro')^2 + (lambda/N)*sum([unfold(W_1,1),unfold(W_2,2),unfold(W_3,3)]);
+    
+    %Checks if user has the SeDiL directory
+    if(~exist('../SeDiL','dir'))
+        error('SeDiL not a directory please run the LSRImageDenoising_noSeDiL.m instead');
+    end
+    
     S = load(path_to_rand_state);
 
     %Importing helper functions and other algorithms
@@ -64,8 +70,7 @@ function LSRImageDenoising(monte_carlos,path_to_rand_state,path_to_pic, image, r
     dim1=size(input_data,1);
     dim2=size(input_data,2);
     
-    
-    %In orginal MainReal_updated_house_rnd1.m the stride=2
+    % Breaking the image up into patches
     step = 2; %stride
     if(image ~= "House")
         step = 3;
@@ -249,7 +254,7 @@ function LSRImageDenoising(monte_carlos,path_to_rand_state,path_to_pic, image, r
                 disp('Insufficient number of training samples for K-SVD')
             end
 
-             %% LS Updates(BCD Algo)
+            %% LS Updates(BCD Algo)
             disp('Training structured dictionary using LS')
             tic
             [D_LS,X_train_LS] = LS_SC_3D(Y_train,paramSC,Max_Iter_DL,D_init_k{1},D_init_k{2},D_init_k{3});
@@ -402,6 +407,8 @@ function LSRImageDenoising(monte_carlos,path_to_rand_state,path_to_pic, image, r
                 'Rep_err_test_TeFDiL_OMP','Rep_err_test_sum_BCD_OMP', 'Rep_err_test_STARK_OMP', 'Rep_err_test_TeFDiL32_OMP')
         end
     end
+    %Creates a directory for the image and places the data in the
+    %corresponding directory
     mkdir(image);
     movefile(strcat(name,'.mat'), image);
 end
