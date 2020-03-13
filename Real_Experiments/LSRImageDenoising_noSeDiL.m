@@ -1,11 +1,11 @@
-%Main function for image denoising experiment
+%% Main function for image denoising experiment without SeDiL
 
 %% Parameters
 % monte_carlos: Number of monte carlos to run
 % path_to_rand_state: The path to the random state you want to use
 % path_to_pic: The path to the image you want to learn the dictionary on an denoise
-% image: The name of the image you're denoising (ex. 'Lena', 'Mushroom',etc.)
-% randState: name of random stat being used (rnd1, rnd2, rnd3)
+% image: The name of the image you're denoising (ex. 'Lena', 'Mushroom', 'House, or 'Castle')
+% randState: name of random stat being used ('rnd1', 'rnd2' or 'rnd3')
 function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, image, randState)
     % Y: observation matrix
     % D: dictionary
@@ -63,8 +63,8 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
     dim1=size(input_data,1);
     dim2=size(input_data,2);
     
-    
-    %In orginal MainReal_updated_house_rnd1.m the stride=2
+
+    %Breaking image up into patches
     step = 2; %stride
     if(image ~= "House")
         step = 3;

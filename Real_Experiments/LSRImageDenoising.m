@@ -1,4 +1,4 @@
-%Main function for image denoising experiment
+%% Main function for image denoising experiment
 
 %% Parameters
 % monte_carlos: Number of monte carlos to run
