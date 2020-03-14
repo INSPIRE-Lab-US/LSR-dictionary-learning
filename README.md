@@ -4,6 +4,7 @@
 - [Reproducing Real Experiments](#real_experiments)
 - [Reproducing Online Experiments](#online_experiments)
 - [Reproducing Synthetic Experiments](#synthetic_experiments)
+- [Contributors](#contributors)
 <!-- /MarkdownTOC -->
 
 
@@ -83,4 +84,12 @@ To obtain our results we ran the `synthetic_experiments.m` file which will produ
 ## Runtime
 On our servers this job completed in 3 days 21 hours and 52 minutes. However this may vary depending on your computational power.
 
+<a name="contributors"></a>
+# Contributors
 
+The original algorithms and experiments were developed by the authors of the paper 
+- [Mohsen Ghassemi](https://scholar.google.com/citations?user=4Aah9P4AAAAJ&hl=en)
+- [Zahra Shakeri](https://scholar.google.com/citations?user=S4ilHdMAAAAJ&hl=en)
+
+The reproducibility of this codebase and publicizing of it was made possible by:
+- [Joseph Shenouda](https://github.com/jshen99)
