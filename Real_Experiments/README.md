@@ -27,3 +27,12 @@ On our servers this job completed in 3 days for the House,Castle and Mushroom im
 
 ## Note
 In order to reproduce our results for image denoising with SeDiL you will need the source code for SeDiL. We do not have permission to publicize that code therefore if you do not have it you can run the alternate function `LSRImageDenoising_noSeDiL.m`
+
+# Synthetic Experiment{#synthetic_experiments}
+This directory contains the code used to produce the results from the synthetic experiments and the Figure 2a in the paper.
+
+## Steps to redproduce
+To obtain our results we ran the `synthetic_experiments.m` file which will produce a `.mat` file called `3D_synthetic_results_25MonteCarlo.mat` after the code has finished running. Once it is finished copy the two generated `.mat` files to your local machine and run the `plot_synthetic.m` script in MATLAB which will produce a plot of the average test error for each algorithm.
+
+## Runtime
+On our servers this job completed in 3 days 21 hours and 52 minutes. However this may vary depending on your computational power. 
