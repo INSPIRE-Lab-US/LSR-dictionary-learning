@@ -52,13 +52,14 @@ To reproduce Table 2 in the paper run the `mushroomDenoisingTeFDiL.m` function t
 - `mushroomDenoisingTeFDiL(8,'../Data/rand_state1','rnd1')`
 - `mushroomDenoisingTeFDiL(8,'../Data/rand_state2','rnd2')`
 - `mushroomDenoisingTeFDiL(9,'../Data/rand_state3','rnd3')`
+
 These will produce three `.mat` files under the `Real_Experiments/Mushroom` directory once all three functions have finished running, run `getMushroomTeFDiLPSNR.m` to produce the PSNR values of TeFDiL at various ranks.
 
 ## Runtime
 On our servers this job completed in 3 days for the House,Castle and Mushroom images however for the Lena image it took over 5 days to finish completely.
 
 ## Note
-In order to reproduce our results for image denoising with SeDiL you will need the source code for SeDiL. We do not have permission to publicize that code therefore if you do not have it you can run the alternate function `LSRImageDenoising_noSeDiL.m` or contact us with expressed permission from the original authors of the SeDiL algorithm to allow us to give you the codebase.
+In order to reproduce our results for image denoising with SeDiL you will need the source code for SeDiL. We do not have permission to publicize that code therefore if you do not have it you can run the alternate function `LSRImageDenoising_noSeDiL.m` or contact us with express permission from the original authors of the SeDiL algorithm to allow us to give you the codebase.
 
 <a name="online_experiments"></a>
 # Online Algorithm Experiment with House image
@@ -75,7 +76,6 @@ After running the function twice (preferably at the same time as 2 jobs) it will
 
 <a name="synthetic_experiments"></a>
 # Synthetic Experiment
-This directory contains the code used to produce the results from the synthetic experiments and the Figure 2a in the paper.
 
 ## Steps to reproduce
 To obtain our results we ran the `synthetic_experiments.m` file which will produce a `.mat` file called `3D_synthetic_results_25MonteCarlo.mat` after the code has finished running. Once it is finished copy the two generated `.mat` files to your local machine and run the `plot_synthetic.m` script in MATLAB which will produce a plot of the average test error for each algorithm.
