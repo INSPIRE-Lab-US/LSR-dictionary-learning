@@ -88,8 +88,8 @@ On our servers this job completed in 3 days 21 hours and 52 minutes. However thi
 # Contributors
 
 The original algorithms and experiments were developed by the authors of the paper 
-- [Mohsen Ghassemi](https://scholar.google.com/citations?user=4Aah9P4AAAAJ&hl=en)
-- [Zahra Shakeri](https://scholar.google.com/citations?user=S4ilHdMAAAAJ&hl=en)
+- [Mohsen Ghassemi](http://eceweb1.rutgers.edu/~mg975/)
+- [Zahra Shakeri](https://sites.google.com/view/zshakeri/home?authuser=1)
 
 The reproducibility of this codebase and publicizing of it was made possible by:
 - [Joseph Shenouda](https://github.com/jshen99)
