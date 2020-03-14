@@ -1,5 +1,6 @@
 %This script combines 3 mat files we generated to give us a total of 25
-%montecarlos and then outputs the PSNR
+%montecarlos and then outputs the PSNR for Mushroom denoising by TeFDiL of
+%various ranks
 
 mushroomTeFDiL4_rep_err_OMP = zeros(25,2);
 mushroomTeFDiL8_rep_err_OMP = zeros(25,2);

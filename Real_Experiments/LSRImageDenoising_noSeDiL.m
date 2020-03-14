@@ -26,6 +26,7 @@ function LSRImageDenoising_noSeDiL(monte_carlos,path_to_rand_state,path_to_pic, 
     %Importing main algos
     addpath('../STARK');
     addpath('../TeFDiL');
+    addpath('../BCD');
 
     rng(S);
     N_montcarl = monte_carlos;

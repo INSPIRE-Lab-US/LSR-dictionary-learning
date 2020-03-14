@@ -17,8 +17,9 @@ addpath(genpath('../PARAFAC'));
 addpath(genpath('../FISTA-SPAMS'));
 
 %Adding path to main algorithms
-addpath('../_STARK_Algo');
-addpath('../_TeFDiL_Algo');
+addpath('../STARK');
+addpath('../TeFDiL');
+addpath('../BCD');
 
 %Loading a random seed for our random generator
 S = load('../Data/rand_state1.mat');

@@ -14,7 +14,7 @@ function [Reconst_error_OLS,Reconst_error_ODL]= HouseOnline(path_to_rand_state)
     
     %Dependencies
     addpath('../_utils');
-    addpath('../_OSubDil_Algo');
+    addpath('../_OSubDil');
     addpath(genpath('../FISTA-SPAMS'));
 
     rng(S);

@@ -9,7 +9,7 @@
 function mushroomDenoisingTeFDiL(monte_carlos, path_to_random_state, randState)
     %Adding imports
     addpath('../_utils');
-    addpath('../_TeFDiL_Algo');
+    addpath('../TeFDiL');
     addpath(genpath('../FISTA-SPAMS'));
     addpath(genpath('../PARAFAC'));
 

@@ -1,4 +1,4 @@
-%For rectangular images
+% Image reconstruction image for rectangular images
 function [Image_out, cnt] = ImageRecon2(input_data,N_blocks,dim2_block,step,patch_size,Y_recon,N_freq)
 
     Image_out=zeros(size(input_data));

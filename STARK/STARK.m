@@ -26,9 +26,6 @@ lambdaADMM=param.lambdaADMM;
 
 X=[];% Initialization for FISTA and SPAMS
 
-%%
-% D_init = normcols(Y(:,randperm(size(Y,2),prod(Dictionary_sizes{2}))));
-
 for  iter = 1:Max_Iter_DL
     
     % ******      Compressed Sensing Step      ******    

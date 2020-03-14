@@ -1,4 +1,4 @@
-% For square images
+% Image reconstruction function for square images
 function [Image_out, cnt] = ImageRecon(input_data,N_blocks,dim2_block,step,patch_size,Y_recon,N_freq)
 
     Image_out=zeros(size(input_data));
