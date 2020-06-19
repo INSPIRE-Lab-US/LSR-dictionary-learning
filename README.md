@@ -16,7 +16,7 @@ This repo contains the code used for numerical experiments in the "[Learning Mix
 ## License and Citation
 The code in this repo is being released under the GNU General Public License v3.0; please refer to the [LICENSE](./LICENSE) file in the repo for detailed legalese pertaining to the license. In particular, if you use any part of this code then you must cite both the original paper as well as this codebase as follows:
 
-**Paper Citation:** M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020.
+**Paper Citation:** M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020; doi: [10.1109/TSP.2019.2952046](https://doi.org/10.1109/TSP.2019.2952046).
 
 **Codebase Citation:** J. Shenouda, M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Codebase---Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," GitHub Repository, 2020.
 
@@ -39,13 +39,16 @@ Almost all of the experiment were completed in about 3 days; however, some of th
 
 **Note:** Precise values of some of the parameters, such as the random seeds, initially used to generate results in the paper were lost. Nonetheless, all the results obtained from this codebase are consistent with all the discussions and conclusions made in the paper.
 
+## External Dependencies
+In order to reproduce our results for image denoising with the [SeDiL](https://doi.org/10.1109/CVPR.2013.63) algorithm, you will need the source code for SeDiL; however, we do not have permission to publicize that code. In the absence of that code, you can run the alternative function `LSRImageDenoising_noSeDiL.m`. Alternatively, you can contact us with proof of express permission from the original authors of the SeDiL algorithm, after which we can provide you the codebase that includes SeDiL.
+
 <a name="real_experiments"></a>
 # Real-data Experiments
-The `Real_Experiments` directory contains the code used to produce the results for the real image denoising experiments as described in the paper. 
+The `Real_Experiments` directory contains the code used to produce the results for the real image denoising experiments as described in the paper.
 
 ## Steps to reproduce the results
 ### Table II in the Paper: Performance of all Dictionary Learning Algorithms
-To perform the image denoising experiments, we had one function `LSRImageDenoising.m` that was used for each image by passing in different parameters to the function. In order to speed up our computations, we ran the`LSRImageDenoising.m` function 3 times for each image and then concatenated our representation errors in all three `.mat` files that our function returned to give us a a total of 25 Monte Carlo trials.
+To perform the image denoising experiments for Table II in the paper, we had one function `LSRImageDenoising.m` that was used for each image by passing in different parameters to the function. In order to speed up our computations, we ran the`LSRImageDenoising.m` function three times for each image and then concatenated our representation errors in all three `.mat` files that our function returned to give us results corresponding to a total of 25 Monte Carlo trials.
 
 For example to perform image denoising experiments on the "House" image, we ran:
 - `LSRImageDenoising(8, '../Data/rand_state1.mat','../Data/house_color.tiff', "House", "rnd1");`
@@ -65,40 +68,42 @@ To reproduce Table III in the paper, we ran the `mushroomDenoisingTeFDiL.m` func
 This produces three `.mat` files under the `Real_Experiments/Mushroom` directory. Once all three functions finished running, we ran `getMushroomTeFDiLPSNR.m` to produce the PSNR values of TeFDiL at various ranks, corresponding to Table III in the paper.
 
 ## Runtime
-On our servers, this job completed in 3 days for the House, Castle and Mushroom images; however for the Lena image, it took over 5 days for the job to finish completely.
-
-## External Dependency
-In order to reproduce our results for image denoising with SeDiL, you will need the source code for SeDiL. We do not have permission to publicize that code; therefore, if you do not have it then you can run the alternative function `LSRImageDenoising_noSeDiL.m` or contact us with proof of express permission from the original authors of the SeDiL algorithm to allow us to give you the codebase that includes SeDiL.
+On our servers, this job completed in three days for the House, Castle and Mushroom images; however for the Lena image, it took over five days for the job to finish completely.
 
 <a name="online_experiments"></a>
-# Online Algorithm Experiment with House image
+# Online-learning Algorithm Experiments with House image
 The `Online_Experiment` directory contains the code used to run the experiments for the online dictionary learning algorithms.
-## Steps to reproduce
-- Run the `HouseOnline.m` function twice once with `Data/rand_state1` and again with `Data/rand_state2`
 
-ex.
+## Steps to reproduce the results
+In order to reproduce Figure 3(b) in the paper, we ran the `HouseOnline.m` function twice; once with `Data/rand_state1` and again with `Data/rand_state2`. E.g.,
 - `HouseOnline('../Data/rand_state1')`
 - `HouseOnline('../Data/rand_state2')`
 
-We split up the monte carlos over two jobs on our server for a total of 30 monte carlos.
+We split up the Monte Carlo trials over two jobs on our server for a total of 30 Monte Carlo trials.
 
-After running the function twice (preferably at the same time as 2 jobs) it will save 2 new `.mat` files copy those new `.mat` files to your local machine and run the  `plotsOnline.m` script which will load in the two `.mat` files that were generated and concatenate them together before plotting the result. 
+After running the function twice (preferably at the same time as two jobs), it will save two new `.mat` files; copy those new `.mat` files to your local machine and run the  `plotsOnline.m` script, which will load in the two `.mat` files that were generated and concatenate them together before plotting the result. 
+
 ## Runtime
-It took about 3 days for our online experiments to finish running.
+It took about three days for our online experiments to finish running.
+
 <a name="synthetic_experiments"></a>
-# Synthetic Experiment
+# Synthetic-data Experiments
 The code for the synthetic experiments can be found in the `Synthetic_Experiments` directory.
-## Steps to reproduce
-To obtain our results we ran the `synthetic_experiments.m` file which will return a `.mat` file called `3D_synthetic_results_25MonteCarlo.mat` after the code has finished running. Once it is finished copy the generated `.mat` files to your local machine and run the `plot_synthetic.m` script in MATLAB which will produce a plot of the average test error for each algorithm.
+
+## Steps to reproduce the results
+In order to reproduce Figure 3(a) in the paper, we ran the `synthetic_experiments.m` file that returns a `.mat` file called `3D_synthetic_results_25MonteCarlo.mat` after the code has finished running. Once the code finishes execution, copy the generated `.mat` files to your local machine and run the `plot_synthetic.m` script in MATLAB. This will produce a plot of the average test error for each algorithm.
 
 ## Runtime
-This experiment also took about 3 days to finish running on our computing cluster.
+This set of experiments also took about three days to finish running on our computing cluster.
+
 <a name="contributors"></a>
 # Contributors
 
-The original algorithms and experiments were developed by the authors of the paper 
+The original algorithms and experiments were developed by the authors of the paper:
 - [Mohsen Ghassemi](http://eceweb1.rutgers.edu/~mg975/)
 - [Zahra Shakeri](https://sites.google.com/view/zshakeri/home?authuser=1)
+- [Anand D. Sarwate](https://www.ece.rutgers.edu/~asarwate/)
+- [Waheed U. Bajwa](http://www.inspirelab.us/)
 
 The reproducibility of this codebase and publicizing of it was made possible by:
 - [Joseph Shenouda](https://github.com/jshen99)
