@@ -1,38 +1,37 @@
-# Learning Mixtures of Separable Dictionaries for Tensor Data: Experiments
+# Learning Mixtures of Separable Dictionaries for Tensor Data: Codebase for Numerical Experiments
+
 ## Table of Contents
 <!-- MarkdownTOC -->
-- [Reproducing Real Experiments](#real_experiments)
-- [Reproducing Online Experiments](#online_experiments)
-- [Reproducing Synthetic Experiments](#synthetic_experiments)
+- [Reproducing Real-data Experiments](#real_experiments)
+- [Reproducing Online-learning Experiments](#online_experiments)
+- [Reproducing Synthetic-data Experiments](#synthetic_experiments)
 - [Contributors](#contributors)
 <!-- /MarkdownTOC -->
 
+This repo contains the code used for numerical experiments in the "[Learning Mixtures of Separable Dictionaries for Tensor Data: Analysis and Algorithm](https://ieeexplore.ieee.org/document/8892653)" paper.
 
-This repo contains the code used for experiments in the [Learning Mixtures of Separable Dictionaries for Tensor Data: Analysis and Algorithm](https://arxiv.org/pdf/1903.09284.pdf) paper.
+M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020.
 
-M. Ghassemi, Z. Shakeri, A. D. Sarwate and W. U. Bajwa, "Learning Mixtures of Separable Dictionaries for Tensor Data: Analysis and Algorithms," in IEEE Transactions on Signal Processing, vol. 68, pp. 33-48, 2020.
+All of our computational experiments were carried out on a Linux high-performance computing (HPC) cluster provided by the Rutgers Office of Advanced Research in Computing; specifically, all of our experiments were run on: 
 
-All of our computational experiments were carried out on a Linux high-performance computing (HPC) cluster provided by Rutgers Office of Advanced Research Computing specifically all of our experiments were run on: 
-
-Lenovo NextScale nx360 servers
+Lenovo NextScale nx360 servers:
 - 2 x 12-core Intel Xeon E5-2680 v3 "Haswell" processors
 - 128 GB RAM
 - 1 TB local scratch disk
 
-Almost all experiment were completed in about 3 days however some of the larger images in the denoising experiments needed about 5 days.
-All of our experiments were done using MATLAB R2019a
+All of our experiments were done using MATLAB R2019a. Almost all of the experiment were completed in about 3 days; however, some of the larger images in the denoising experiments needed about 5 days.
 
-In the paper we conducted three main experiments to produce all plots and charts.
+In the paper, we conducted three main experiments to produce all plots and charts.
 
-1. Comparision of 6 algorithms in denoising 4 different images (Real Experiment)
-2. Analysis of online dictionary learning algorithms on denoising the House image (Online Experiment)
-3. Comparision of 4 dictionary learning algorithms on synthetic data (Synthetic Experiment)
+1. Comparison of six different dictionary learning algorithms in denoising four different images (Real-data Experiments)
+2. Performance evaluation of online dictionary learning algorithms for denoising the "House" image (Online-learning Experiments)
+3. Comparison of four different dictionary learning algorithms on synthetic data (Synthetic-data Experiments)
 
 **Note** Through the process of making this codebase reproducible some of the parameters and specifics of the data analysis initially conducted to report results in the paper were lost. However all the results obtained from this codebase are consistent with all the discussions and conclusions made in the paper.
 
 <a name="real_experiments"></a>
 # Real Experiments
-The `Real_Experiments` directory contains the code used to produce the results from the real image denoising experiments as described in the paper.
+The `Real_Experiments` directory contains the code used to produce the results from the real image denoising experiments as described in the paper. 
 
 ## Steps to reproduce
 ### Performance of all Dictionary Learning Algorithms Table (Table 1)
