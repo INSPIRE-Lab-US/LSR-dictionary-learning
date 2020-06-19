@@ -2,64 +2,73 @@
 
 ## Table of Contents
 <!-- MarkdownTOC -->
+- [General Information](#introduction)
 - [Reproducing Real-data Experiments](#real_experiments)
 - [Reproducing Online-learning Experiments](#online_experiments)
 - [Reproducing Synthetic-data Experiments](#synthetic_experiments)
 - [Contributors](#contributors)
 <!-- /MarkdownTOC -->
 
+<a name="introduction"></a>
+# General Information
 This repo contains the code used for numerical experiments in the "[Learning Mixtures of Separable Dictionaries for Tensor Data: Analysis and Algorithm](https://ieeexplore.ieee.org/document/8892653)" paper.
 
-M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020.
+## License and Citation
+The code in this repo is being released under the GNU General Public License v3.0; please refer to the [LICENSE](./LICENSE) file in the repo for detailed legalese pertaining to the license. In particular, if you use any part of this code then you must cite both the original paper as well as this codebase as follows:
 
-All of our computational experiments were carried out on a Linux high-performance computing (HPC) cluster provided by the Rutgers Office of Advanced Research in Computing; specifically, all of our experiments were run on: 
+**Paper Citation:** M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020.
+
+**Codebase Citation:** J. Shenouda, M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Codebase---Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," GitHub Repository, 2020.
+
+## Computing Environment
+All of our computational experiments were done using MATLAB R2019a. All the experiments were carried out on a Linux high-performance computing (HPC) cluster provided by the Rutgers Office of Advanced Research in Computing; specifically, all of the experiments were run on: 
 
 Lenovo NextScale nx360 servers:
 - 2 x 12-core Intel Xeon E5-2680 v3 "Haswell" processors
 - 128 GB RAM
 - 1 TB local scratch disk
 
-All of our experiments were done using MATLAB R2019a. Almost all of the experiment were completed in about 3 days; however, some of the larger images in the denoising experiments needed about 5 days.
-
-In the paper, we conducted three main experiments to produce all plots and charts.
+## Summary of Experiments
+In the paper, we conducted three main sets of experiments to produce all plots and tables.
 
 1. Comparison of six different dictionary learning algorithms in denoising four different images (Real-data Experiments)
 2. Performance evaluation of online dictionary learning algorithms for denoising the "House" image (Online-learning Experiments)
 3. Comparison of four different dictionary learning algorithms on synthetic data (Synthetic-data Experiments)
 
-**Note** Through the process of making this codebase reproducible some of the parameters and specifics of the data analysis initially conducted to report results in the paper were lost. However all the results obtained from this codebase are consistent with all the discussions and conclusions made in the paper.
+Almost all of the experiment were completed in about 3 days; however, some of the larger images in the denoising experiments needed about 5 days.
+
+**Note:** Precise values of some of the parameters, such as the random seeds, initially used to generate results in the paper were lost. Nonetheless, all the results obtained from this codebase are consistent with all the discussions and conclusions made in the paper.
 
 <a name="real_experiments"></a>
-# Real Experiments
-The `Real_Experiments` directory contains the code used to produce the results from the real image denoising experiments as described in the paper. 
+# Real-data Experiments
+The `Real_Experiments` directory contains the code used to produce the results for the real image denoising experiments as described in the paper. 
 
-## Steps to reproduce
-### Performance of all Dictionary Learning Algorithms Table (Table 1)
-To perform the image denoising experiment we had one function `LSRImageDenoising.m` which was used for each image by passing in different parameters to the function. In order to speed up our computation we ran the`LSRImageDenoising.m` function 3 times for each image then concatenated our representation errors in all three `.mat` files that our function returned to give us a a total of 25 monte carlos.
+## Steps to reproduce the results
+### Table II in the Paper: Performance of all Dictionary Learning Algorithms
+To perform the image denoising experiments, we had one function `LSRImageDenoising.m` that was used for each image by passing in different parameters to the function. In order to speed up our computations, we ran the`LSRImageDenoising.m` function 3 times for each image and then concatenated our representation errors in all three `.mat` files that our function returned to give us a a total of 25 Monte Carlo trials.
 
-For example to perform image denoising experiments on the House image we ran:
+For example to perform image denoising experiments on the "House" image, we ran:
 - `LSRImageDenoising(8, '../Data/rand_state1.mat','../Data/house_color.tiff', "House", "rnd1");`
 - `LSRImageDenoising(8, '../Data/rand_state2.mat', '../Data/house_color.tiff', "House", "rnd2")`
 - `LSRImageDenoising(9, '../Data/rand_State3.mat', '../Data/house_color.tiff', "House", "rnd3")`
 
-As three separate jobs on our computing cluster. Each function call generated a `.mat` file in a directory pertaining to the image that was denoised. 
+as three separate jobs on our computing cluster. Each function call generated a `.mat` file in a directory pertaining to the image that was denoised. 
 
-After the the experiment for an image is done running, run the script in the respective image directory 
-ex. `House/getHousePSNR.m` this will print out a table similar to the one in the paper with the PSNR obtained for each algorithm.
+After the experiments for an image were done running, we ran the script in the respective image directory (e.g., `House/getHousePSNR.m`) in order to produce a table similar to the one in the paper with the PSNR obtained for each algorithm.
 
-### Performance of TeFDiL with various ranks on Mushroom (Table 2)
-To reproduce Table 2 in the paper run the `mushroomDenoisingTeFDiL.m` function three times.
+### Table III in the Paper: Performance of TeFDiL With Various Ranks on "Mushroom"
+To reproduce Table III in the paper, we ran the `mushroomDenoisingTeFDiL.m` function three times.
 - `mushroomDenoisingTeFDiL(8,'../Data/rand_state1','rnd1')`
 - `mushroomDenoisingTeFDiL(8,'../Data/rand_state2','rnd2')`
 - `mushroomDenoisingTeFDiL(9,'../Data/rand_state3','rnd3')`
 
-These will produce three `.mat` files under the `Real_Experiments/Mushroom` directory once all three functions have finished running, run `getMushroomTeFDiLPSNR.m` to produce the PSNR values of TeFDiL at various ranks.
+This produces three `.mat` files under the `Real_Experiments/Mushroom` directory. Once all three functions finished running, we ran `getMushroomTeFDiLPSNR.m` to produce the PSNR values of TeFDiL at various ranks, corresponding to Table III in the paper.
 
 ## Runtime
-On our servers this job completed in 3 days for the House,Castle and Mushroom images however for the Lena image it took over 5 days to finish completely.
+On our servers, this job completed in 3 days for the House, Castle and Mushroom images; however for the Lena image, it took over 5 days for the job to finish completely.
 
-## Note
-In order to reproduce our results for image denoising with SeDiL you will need the source code for SeDiL. We do not have permission to publicize that code therefore if you do not have it you can run the alternative function `LSRImageDenoising_noSeDiL.m` or contact us with express permission from the original authors of the SeDiL algorithm to allow us to give you the codebase.
+## External Dependency
+In order to reproduce our results for image denoising with SeDiL, you will need the source code for SeDiL. We do not have permission to publicize that code; therefore, if you do not have it then you can run the alternative function `LSRImageDenoising_noSeDiL.m` or contact us with proof of express permission from the original authors of the SeDiL algorithm to allow us to give you the codebase that includes SeDiL.
 
 <a name="online_experiments"></a>
 # Online Algorithm Experiment with House image
