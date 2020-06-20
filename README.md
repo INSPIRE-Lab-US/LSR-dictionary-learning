@@ -20,7 +20,7 @@ The code in this repo is being released under the GNU General Public License v3.
 
 **Paper Citation:** M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," IEEE Trans. Signal Processing, vol. 68, pp. 33-48, 2020; doi: [10.1109/TSP.2019.2952046](https://doi.org/10.1109/TSP.2019.2952046).
 
-**Codebase Citation:** J. Shenouda, M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Codebase---Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," GitHub Repository, 2020; doi: [10.5281/zenodo.3901853](https://doi.org/10.5281/zenodo.3901853).
+**Codebase Citation:** J. Shenouda, M. Ghassemi, Z. Shakeri, A.D. Sarwate, and W.U. Bajwa, "Codebase---Learning mixtures of separable dictionaries for tensor data: Analysis and algorithms," GitHub Repository, 2020; doi: [10.5281/zenodo.3901852](https://doi.org/10.5281/zenodo.3901852).
 
 ## Computing Environment
 All of our computational experiments were done using MATLAB R2019a. All the experiments were carried out on a Linux high-performance computing (HPC) cluster provided by the Rutgers Office of Advanced Research in Computing; specifically, all of the experiments were run on: 
